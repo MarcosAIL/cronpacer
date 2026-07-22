@@ -181,10 +181,141 @@ Quieres que todos los dias a las 3:00 AM (cuando hay menos trafico) se ejecute u
     "type": "cron",
     "expression": "0 3 * * *"
   }
+## Casos de Uso por Métodos HTTP (GET, POST, PUT, PATCH, DELETE, OPTIONS) 🛠️
+
+El worker de Cronpacer usa el `fetch` nativo de Node.js, lo que significa que puedes configurar **cualquier método HTTP** en el campo `target.method`. Aquí tienes ejemplos de para qué sirve cada método y cómo mandarlo en el payload:
+
+### 1. GET (Monitoreo y Consultas)
+Se usa para consultar información de un servidor de forma periódica (como un ping de monitoreo para ver si un sitio web sigue vivo).
+* **Caso de uso:** Chequear si la API pública sigue online cada 5 minutos.
+* **Payload:**
+```json
+{
+  "name": "Healthcheck API Externa",
+  "target": {
+    "url": "https://api.tuservicio.com/health",
+    "method": "GET"
+  },
+  "schedule": {
+    "type": "cron",
+    "expression": "*/5 * * * *"
+  }
+}
+```
+
+### 2. POST (Creación de recursos y disparadores)
+Se usa para crear nuevos datos en otra plataforma o disparar una acción (es el más común en Webhooks).
+* **Caso de uso:** Mandar un mensaje a un canal de Slack (webhook de Slack) inmediatamente.
+* **Payload:**
+```json
+{
+  "name": "Alerta Slack",
+  "target": {
+    "url": "https://hooks.slack.com/services/T00/B00/X00",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "text": "Se ha detectado un nuevo registro en la app."
+    }
+  }
+}
+```
+
+### 3. PUT (Reemplazo o actualización completa)
+Se usa para sobreescribir o actualizar por completo un recurso en un servidor externo.
+* **Caso de uso:** Actualizar un archivo de configuración o reporte completo en un servidor CDN todos los días a medianoche.
+* **Payload:**
+```json
+{
+  "name": "Sincronizar Configuracion CDN",
+  "target": {
+    "url": "https://api.cdn.com/v1/configs/global",
+    "method": "PUT",
+    "headers": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer cdn_token_123"
+    },
+    "body": {
+      "maintenance_mode": false,
+      "allowed_ips": ["192.168.1.1"],
+      "last_updated": "2026-07-22"
+    }
+  },
+  "schedule": {
+    "type": "cron",
+    "expression": "0 0 * * *"
+  }
+}
+```
+
+### 4. PATCH (Actualización parcial de recursos)
+Se usa para modificar solo una pequeña parte de un registro sin tocar todo lo demás.
+* **Caso de uso:** Desactivar temporalmente una cuenta de usuario suspendida 30 días después de su creación.
+* **Payload:**
+```json
+{
+  "name": "Suspender usuario inactivo",
+  "target": {
+    "url": "https://mi-crm.com/api/users/usr_882",
+    "method": "PATCH",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "status": "suspended",
+      "suspendedReason": "Falta de pago"
+    }
+  },
+  "schedule": {
+    "type": "delay",
+    "delaySeconds": 2592000
+  }
+}
+```
+
+### 5. DELETE (Eliminación de recursos y limpieza)
+Se usa para destruir o remover un recurso de forma programada en un backend.
+* **Caso de uso:** Borrar un token temporal de descarga que expira en 1 hora.
+* **Payload:**
+```json
+{
+  "name": "Expira Token de Descarga - token_abc123",
+  "target": {
+    "url": "https://mi-api.com/tokens/token_abc123",
+    "method": "DELETE",
+    "headers": {
+      "Authorization": "Bearer admin_secret"
+    }
+  },
+  "schedule": {
+    "type": "delay",
+    "delaySeconds": 3600
+  }
+}
+```
+
+### 6. OPTIONS (Verificación de CORS o Capacidades)
+Se usa para hacer peticiones de "pre-vuelo" (preflight) para ver qué métodos y cabeceras soporta el servidor de destino antes de hacer operaciones pesadas.
+* **Caso de uso:** Validar los métodos aceptados por un endpoint antes de sincronizar datos grandes.
+* **Payload:**
+```json
+{
+  "name": "Preflight Check en Endpoint",
+  "target": {
+    "url": "https://api-socia.com/v2/bulk-import",
+    "method": "OPTIONS",
+    "headers": {
+      "Origin": "https://cronpacer.com",
+      "Access-Control-Request-Method": "POST"
+    }
+  }
 }
 ```
 
 ---
+
 
 ## Estructura del codigo 📁
 
