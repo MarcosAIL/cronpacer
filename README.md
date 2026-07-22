@@ -1,6 +1,6 @@
 # Cronpacer 🚀
 
-Este es un poryecto pensado para programar y despachar webhooks de forma automatica y facil. La idea es que puedas encolar tareas para que se ejecuten despues de unos segundos (delay) o de forma repetitiva usando expresiones CRON.
+Este es un proyecto pensado para programar y despachar webhooks de forma automatica y facil. La idea es que puedas encolar tareas para que se ejecuten despues de unos segundos (delay) o de forma repetitiva usando expresiones CRON.
 
 Usa **Express** para recibir las peticiones, **BullMQ** (con Redis) para la cola de tareas en segundo plano, y **Prisma** (con Postgres) para guardar el historial (logs) de lo que pasa.
 
