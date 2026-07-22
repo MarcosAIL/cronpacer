@@ -103,6 +103,87 @@ Para que se ejecute, por ejemplo, cada minuto:
 }
 ```
 
+## Casos de Uso Reales 💡
+
+Para entender mejor para que sirve Cronpacer, aqui tienes tres escenarios reales bien explicados:
+
+### Caso 1: Reintentos de pago con Stripe (Webhook tolerante a fallos)
+Imaginate que vendes algo y Stripe te manda un webhook para avisar que el pago se completo. Si tu servidor esta caido por 5 minutos, vas a perder ese webhook y no le vas a entregar el producto al cliente.
+Con Cronpacer, Stripe le pega a Cronpacer, y Cronpacer intenta pegarle a tu backend. Si tu backend falla (retorna 500 o 404), Cronpacer reintenta la peticion usando la politica de reintentos exponencial (por ejemplo, reintentar despues de 2s, luego 4s, luego 8s).
+
+**Payload a enviar:**
+```json
+{
+  "name": "Procesar Webhook Stripe - Pago #10243",
+  "target": {
+    "url": "https://mi-backend.com/webhooks/stripe",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "Stripe-Signature": "t=161488,v1=abcde..."
+    },
+    "body": {
+      "event": "charge.succeeded",
+      "amount": 2990,
+      "customer": "cus_123"
+    }
+  },
+  "retryPolicy": {
+    "maxRetries": 5,
+    "backoff": "exponential",
+    "initialDelaySeconds": 5
+  }
+}
+```
+
+### Caso 2: Recordatorio de carrito abandonado (Delay de 24 horas)
+Cuando un usuario agrega cosas al carrito en tu tienda virtual pero no compra, quieres mandarle un correo de "te extrañamos" exactamente 24 horas despues.
+Puedes programar un delay de 86400 segundos. Si en ese transcurso el usuario compra, puedes manejar la logica en tu endpoint destino (o cancelar el job si quisieras implementarlo despues).
+
+**Payload a enviar:**
+```json
+{
+  "name": "Recordatorio Carrito Abandonado - Usuario #992",
+  "target": {
+    "url": "https://mi-backend.com/api/emails/abandoned-cart",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "userId": 992,
+      "cartItems": [12, 45],
+      "discountCode": "TEEXTRAÑAMOS10"
+    }
+  },
+  "schedule": {
+    "type": "delay",
+    "delaySeconds": 86400
+  }
+}
+```
+
+### Caso 3: Backup diario de la Base de Datos (Cron recurrente)
+Quieres que todos los dias a las 3:00 AM (cuando hay menos trafico) se ejecute un script de backup y se suba a AWS S3. Cronpacer puede disparar el webhook de ejecucion de forma automatica cada dia.
+
+**Payload a enviar:**
+```json
+{
+  "name": "Trigger Backup Diario Postgres",
+  "target": {
+    "url": "https://mi-backend.com/api/maintenance/backup",
+    "method": "POST",
+    "headers": {
+      "X-Admin-Token": "secreto-super-seguro"
+    }
+  },
+  "schedule": {
+    "type": "cron",
+    "expression": "0 3 * * *"
+  }
+}
+```
+
 ---
 
 ## Estructura del codigo 📁
