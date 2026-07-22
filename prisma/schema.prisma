@@ -1,0 +1,18 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model JobLog {
+  id        String   @id @default(uuid())
+  jobId     String
+  jobName   String
+  status    String   // "success" o "failed"
+  targetUrl String
+  message   String?  // Detalles del éxito o el error
+  createdAt DateTime @default(now())
+}
