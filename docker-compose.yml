@@ -22,6 +22,16 @@ services:
     restart: unless-stopped
     command: redis-server --appendonly yes
 
+  pgadmin:
+    image: dpage/pgadmin4:8.8
+    container_name: orchestrator_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: adminpassword
+    ports:
+      - "5051:80"
+    restart: unless-stopped
+
 volumes:
   pgdata:
   redisdata:
