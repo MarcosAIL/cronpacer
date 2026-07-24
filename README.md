@@ -1,4 +1,4 @@
-# Cronpacer 🚀
+# SupaCron 🚀
 
 Este es un proyecto pensado para programar y despachar webhooks de forma automatica y facil. La idea es que puedas encolar tareas para que se ejecuten despues de unos segundos (delay) o de forma repetitiva usando expresiones CRON.
 
@@ -36,7 +36,7 @@ Para correr esto necesitas tener instalado:
 3. **Variables de entorno:**
    Crea un archivo `.env` en la raiz y pon la conexion de Postgres (puedes guiarte de las credenciales de docker-compose):
    ```env
-   DATABASE_URL="postgresql://postgres:postgres@localhost:5432/cronpacer?schema=public"
+   DATABASE_URL="postgresql://postgres:postgres@localhost:5432/supacron?schema=public"
    REDIS_HOST="127.0.0.1"
    REDIS_PORT="6379"
    ```
@@ -105,11 +105,11 @@ Para que se ejecute, por ejemplo, cada minuto:
 
 ## Casos de Uso Reales 💡
 
-Para entender mejor para que sirve Cronpacer, aqui tienes tres escenarios reales bien explicados:
+Para entender mejor para que sirve SupaCron, aqui tienes tres escenarios reales bien explicados:
 
 ### Caso 1: Reintentos de pago con Stripe (Webhook tolerante a fallos)
 Imaginate que vendes algo y Stripe te manda un webhook para avisar que el pago se completo. Si tu servidor esta caido por 5 minutos, vas a perder ese webhook y no le vas a entregar el producto al cliente.
-Con Cronpacer, Stripe le pega a Cronpacer, y Cronpacer intenta pegarle a tu backend. Si tu backend falla (retorna 500 o 404), Cronpacer reintenta la peticion usando la politica de reintentos exponencial (por ejemplo, reintentar despues de 2s, luego 4s, luego 8s).
+Con SupaCron, Stripe le pega a SupaCron, y SupaCron intenta pegarle a tu backend. Si tu backend falla (retorna 500 o 404), SupaCron reintenta la peticion usando la politica de reintentos exponencial (por ejemplo, reintentar despues de 2s, luego 4s, luego 8s).
 
 **Payload a enviar:**
 ```json
@@ -183,7 +183,7 @@ Quieres que todos los dias a las 3:00 AM (cuando hay menos trafico) se ejecute u
   }
 ## Casos de Uso por Métodos HTTP (GET, POST, PUT, PATCH, DELETE, OPTIONS) 🛠️
 
-El worker de Cronpacer usa el `fetch` nativo de Node.js, lo que significa que puedes configurar **cualquier método HTTP** en el campo `target.method`. Aquí tienes ejemplos de para qué sirve cada método y cómo mandarlo en el payload:
+El worker de SupaCron usa el `fetch` nativo de Node.js, lo que significa que puedes configurar **cualquier método HTTP** en el campo `target.method`. Aquí tienes ejemplos de para qué sirve cada método y cómo mandarlo en el payload:
 
 ### 1. GET (Monitoreo y Consultas)
 Se usa para consultar información de un servidor de forma periódica (como un ping de monitoreo para ver si un sitio web sigue vivo).
@@ -307,7 +307,7 @@ Se usa para hacer peticiones de "pre-vuelo" (preflight) para ver qué métodos y
     "url": "https://api-socia.com/v2/bulk-import",
     "method": "OPTIONS",
     "headers": {
-      "Origin": "https://cronpacer.com",
+      "Origin": "https://supacron.com",
       "Access-Control-Request-Method": "POST"
     }
   }
