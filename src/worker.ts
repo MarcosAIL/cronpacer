@@ -50,9 +50,35 @@ export const webhookWorker = new Worker('webhooks', async (job: Job) => {
 // Escuchamos eventos globales del Worker para los Logs en la Base de Datos
 webhookWorker.on('completed', async (job) => {
   console.log(`➡️ [Job ${job.id}] marcado como COMPLETADO. Guardando en Postgres...`);
+  
+  let friendlyJobId = job.id as string;
+  
+  // Si es un trabajo repetitivo, tiene un ID como: "repeat:HASH:TIMESTAMP"
+  if (friendlyJobId.startsWith('repeat:')) {
+    const parts = friendlyJobId.split(':');
+    // Tomamos el hash o key del job repetitivo (suele ser el segundo elemento)
+    const repeatKey = parts[1] || 'rep';
+    // Generamos un ID base más corto para mostrar fuera del paréntesis (ej. primeros 6 caracteres del hash)
+    const baseId = repeatKey.substring(0, 6);
+    
+    // Contamos cuántas ejecuciones de este Job repetitivo ya tenemos registradas en la DB
+    const count = await prisma.jobLog.count({
+      where: {
+        jobName: job.name,
+        targetUrl: job.data.target.url,
+        jobId: { startsWith: `${baseId}(` }
+      }
+    });
+    
+    friendlyJobId = `${baseId}(${count + 1})`;
+  } else {
+    // Si no es repetitivo, podemos quedarnos con los primeros 8 caracteres del UUID para que sea más estético
+    friendlyJobId = friendlyJobId.substring(0, 8);
+  }
+
   await prisma.jobLog.create({
     data: {
-      jobId: job.id as string,
+      jobId: friendlyJobId,
       jobName: job.name,
       status: 'success',
       targetUrl: job.data.target.url,
@@ -62,11 +88,38 @@ webhookWorker.on('completed', async (job) => {
 });
 
 webhookWorker.on('failed', async (job, err) => {
+  // Si el trabajo fue removido por el usuario manualmente, BullMQ dispara este evento con "job removed"
+  // No queremos guardar esto como un error en Postgres
+  if (err.message === 'job removed') {
+    console.log(`➡️ [Job ${job?.id}] fue removido manualmente por el usuario. Omitiendo registro de error.`);
+    return;
+  }
+
   console.log(`➡️ [Job ${job?.id}] HA FALLADO (Intentos agotados). Guardando en Postgres...`);
   if (job) {
+    let friendlyJobId = job.id as string;
+    
+    if (friendlyJobId.startsWith('repeat:')) {
+      const parts = friendlyJobId.split(':');
+      const repeatKey = parts[1] || 'rep';
+      const baseId = repeatKey.substring(0, 6);
+      
+      const count = await prisma.jobLog.count({
+        where: {
+          jobName: job.name,
+          targetUrl: job.data.target.url,
+          jobId: { startsWith: `${baseId}(` }
+        }
+      });
+      
+      friendlyJobId = `${baseId}(${count + 1})`;
+    } else {
+      friendlyJobId = friendlyJobId.substring(0, 8);
+    }
+
     await prisma.jobLog.create({
       data: {
-        jobId: job.id as string,
+        jobId: friendlyJobId,
         jobName: job.name,
         status: 'failed',
         targetUrl: job.data.target.url,
