@@ -40,6 +40,8 @@
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --sidebar-w-collapsed: 72px;
+  --sidebar-w-expanded: 260px;
 }
 
 /* ---------- Reset & Base ---------- */
@@ -113,48 +115,23 @@ body {
   padding: 0 2rem;
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 90;
   box-shadow: var(--shadow-xs);
+  height: 64px;
+  display: flex;
+  align-items: center;
 }
 
 .header-inner {
+  width: 100%;
   max-width: 1280px;
   margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 64px;
 }
 
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
-  text-decoration: none;
-}
-
-.logo-icon {
-  width: 36px;
-  height: 36px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.125rem;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
-}
-
-.logo-text {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: var(--text-primary);
-  letter-spacing: -0.03em;
-}
-
-.logo-text span {
-  color: var(--accent);
-}
+/* Retirado logo del header ya que ahora vive en el Sidebar */
 
 .header-right {
   display: flex;
@@ -215,7 +192,8 @@ body {
 .main {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 1.5rem 2rem 3rem;
+  padding: 2rem 2rem 3rem;
+  width: 100%;
 }
 
 /* ---------- Section Titles ---------- */
@@ -949,4 +927,224 @@ body {
   .logo-text {
     font-size: 1.125rem;
   }
+}
+
+/* =========================================
+   NEW REDESIGN: SIDEBAR & LAYOUT
+   ========================================= */
+
+/* ---------- Layout Wrapper ---------- */
+.layout-wrapper {
+  margin-left: var(--sidebar-w-collapsed);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.layout-wrapper.sidebar-pinned {
+  margin-left: var(--sidebar-w-expanded);
+}
+
+/* ---------- Sidebar ---------- */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: var(--sidebar-w-collapsed);
+  background: var(--bg-primary);
+  border-right: 1px solid var(--border);
+  z-index: 200;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.sidebar:hover, .sidebar.pinned {
+  width: var(--sidebar-w-expanded);
+  box-shadow: var(--shadow-lg);
+}
+
+.sidebar-header {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  padding: 0 18px; /* 18px to align icon center (36px width in 72px space = 18px margin) */
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar .logo-icon {
+  flex-shrink: 0;
+}
+
+.sidebar-nav {
+  padding: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--text-secondary);
+  padding: 0 18px;
+  height: 48px;
+  gap: 12px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.nav-link:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.nav-link.active {
+  color: var(--accent-dark);
+  background: var(--accent-ultralight);
+}
+
+.nav-link.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--accent);
+  border-radius: 0 4px 4px 0;
+}
+
+.nav-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.nav-text {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar:hover .nav-text, .sidebar.pinned .nav-text {
+  opacity: 1;
+}
+
+/* ---------- Hamburger Button ---------- */
+.hamburger-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s ease;
+}
+
+.hamburger-btn:hover {
+  background: var(--bg-tertiary);
+}
+
+.hamburger-line {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background-color: var(--text-primary);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+/* Pinned state hamburger animation (X) */
+.layout-wrapper.sidebar-pinned .hamburger-line:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.layout-wrapper.sidebar-pinned .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+.layout-wrapper.sidebar-pinned .hamburger-line:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ---------- Page Views ---------- */
+.page-view {
+  display: none;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.page-view.active {
+  display: block;
+}
+
+/* ---------- Reports Module Elements ---------- */
+.donut-chart {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: conic-gradient(var(--accent) 0% 0%, var(--danger) 0% 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: background 0.5s ease-out;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.05), var(--shadow-sm);
+}
+
+.donut-hole {
+  width: 110px;
+  height: 110px;
+  background: var(--bg-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  box-shadow: inset var(--shadow-xs);
+}
+
+.reports-summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+}
+
+.summary-icon {
+  font-size: 1.5rem;
+  margin-right: 1rem;
+}
+
+.summary-text {
+  flex: 1;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+}
+
+.summary-num {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-primary);
 }

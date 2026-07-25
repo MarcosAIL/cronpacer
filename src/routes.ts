@@ -217,4 +217,30 @@ router.delete('/jobs/:id', async (req: Request, res: Response): Promise<any> => 
   }
 });
 
+// ──────────────────────────────────────────────
+// GET /api/jobs/reports — Estadísticas para el módulo de Reportes
+// ──────────────────────────────────────────────
+router.get('/jobs/reports', async (_req: Request, res: Response): Promise<any> => {
+  try {
+    const total = await prisma.jobLog.count();
+    const successful = await prisma.jobLog.count({ where: { status: 'success' } });
+    const failed = await prisma.jobLog.count({ where: { status: 'failed' } });
+    
+    // Ejecuciones de hoy (desde la medianoche)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const todayTotal = await prisma.jobLog.count({ where: { createdAt: { gte: today } } });
+    const todayFailed = await prisma.jobLog.count({ where: { status: 'failed', createdAt: { gte: today } } });
+
+    res.json({
+      historical: { total, successful, failed },
+      today: { total: todayTotal, failed: todayFailed }
+    });
+  } catch (error: any) {
+    console.error('Error al obtener reportes:', error.message);
+    res.status(500).json({ error: 'Error al obtener reportes' });
+  }
+});
+
 export default router;

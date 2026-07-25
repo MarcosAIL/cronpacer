@@ -10,184 +10,211 @@
 </head>
 <body>
 
-  <!-- ====== HEADER ====== -->
-  <header class="header">
-    <div class="header-inner">
-      <a href="/" class="logo">
-        <div class="logo-icon">⚡</div>
-        <div class="logo-text">Supa<span>Cron</span></div>
-      </a>
-      <div class="header-right">
-        <span class="header-subtitle">El programador de tareas oficial para Supabase</span>
-        <div id="redis-status" class="redis-status">
-          <span class="redis-dot"></span>
-          <span id="redis-label">Verificando…</span>
+  <!-- ====== FULL WIDTH HEADER ====== -->
+  <header class="header" style="position: fixed; top: 0; left: 0; width: 100%; z-index: 300; background: var(--bg-primary); border-bottom: 1px solid var(--border); height: 64px; display: flex; align-items: center; padding: 0 2rem;">
+    <div class="header-inner" style="width: 100%; max-width: 1280px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+      <div class="header-left" style="display: flex; align-items: center; gap: 1rem;">
+        <div class="logo" style="display: flex; align-items: center; gap: 0.625rem; text-decoration: none;">
+          <div class="logo-icon" style="width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 1.125rem; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">⚡</div>
+          <div class="logo-text" style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.03em;">Supa<span style="color: var(--accent);">Cron</span></div>
         </div>
+        <button class="hamburger-btn" id="hamburger-btn" title="Fijar Menú Lateral" style="margin-left: 1rem;">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+        <div class="header-title-text" id="header-title" style="font-weight: 700; font-size: 1.125rem; margin-left: 1rem; color: var(--text-muted); border-left: 1px solid var(--border); padding-left: 1rem;">Dashboard</div>
+      </div>
+      <div class="header-right">
+        <!-- Eliminado a petición del usuario -->
       </div>
     </div>
   </header>
 
-  <!-- ====== MAIN ====== -->
-  <main class="main">
+  <!-- ====== SIDEBAR (Starts below header) ====== -->
+  <aside class="sidebar" id="sidebar" style="top: 64px; height: calc(100vh - 64px);">
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-link active" data-page="page-dashboard" data-title="Dashboard">
+        <span class="nav-icon">🏠</span><span class="nav-text">Dashboard</span>
+      </a>
+      <a href="#" class="nav-link" data-page="page-active-jobs" data-title="Tareas Vigentes">
+        <span class="nav-icon">🗓️</span><span class="nav-text">Vigentes</span>
+      </a>
+      <a href="#" class="nav-link" data-page="page-history" data-title="Historial de Ejecuciones">
+        <span class="nav-icon">📋</span><span class="nav-text">Historial</span>
+      </a>
+      <a href="#" class="nav-link" data-page="page-reports" data-title="Reportes & Analytics">
+        <span class="nav-icon">📈</span><span class="nav-text">Reportes</span>
+      </a>
+    </nav>
+  </aside>
 
-    <!-- ---- Metrics Grid ---- -->
-    <section>
-      <h2 class="section-title"><span class="icon">📊</span> Métricas en Tiempo Real</h2>
-      <div class="metrics-grid">
-        <div class="metric-card">
-          <div class="metric-icon waiting">🕐</div>
-          <div class="metric-info">
-            <div class="metric-value" id="stat-waiting">—</div>
-            <div class="metric-label">Pendientes</div>
+  <!-- ====== MAIN WRAPPER ====== -->
+  <div class="layout-wrapper" id="layout-wrapper" style="margin-top: 64px;">
+    <main class="main">
+      
+      <!-- ========================================== -->
+      <!-- PAGE: DASHBOARD -->
+      <!-- ========================================== -->
+      <div id="page-dashboard" class="page-view active">
+        <!-- Metrics Grid -->
+        <section>
+          <h2 class="section-title"><span class="icon">📊</span> Métricas en Tiempo Real</h2>
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-icon waiting">🕐</div>
+              <div class="metric-info">
+                <div class="metric-value" id="stat-waiting">—</div>
+                <div class="metric-label">Pendientes</div>
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon active">⚡</div>
+              <div class="metric-info">
+                <div class="metric-value" id="stat-active">—</div>
+                <div class="metric-label">En Proceso</div>
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon completed">✅</div>
+              <div class="metric-info">
+                <div class="metric-value" id="stat-completed">—</div>
+                <div class="metric-label">Exitosos</div>
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon failed">❌</div>
+              <div class="metric-info">
+                <div class="metric-value" id="stat-failed">—</div>
+                <div class="metric-label">Fallidos</div>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-icon active">⚡</div>
-          <div class="metric-info">
-            <div class="metric-value" id="stat-active">—</div>
-            <div class="metric-label">En Proceso</div>
+        </section>
+
+        <!-- Scheduler Form Panel -->
+        <section style="max-width: 800px; margin: 0 auto; width: 100%;">
+          <div class="panel">
+            <div class="panel-header">
+              <h3 class="panel-title">🚀 Programar Nueva Tarea (SupaScheduler)</h3>
+            </div>
+            <div class="panel-body">
+              <form id="scheduler-form" autocomplete="off">
+                <!-- Mode Switcher -->
+                <div class="mode-switcher">
+                  <button type="button" class="mode-tab active" data-mode="supabase">⚡ Supabase Edge Function</button>
+                  <button type="button" class="mode-tab" data-mode="manual">🌐 URL Manual</button>
+                </div>
+
+                <!-- Supabase Mode -->
+                <div id="supabase-section" class="supabase-section visible">
+                  <div class="form-section">
+                    <div class="form-section-title">🔗 Conexión a Supabase</div>
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label class="form-label" for="supa-url">URL del Proyecto</label>
+                        <input class="form-input" type="url" id="supa-url" placeholder="https://tuproyecto.supabase.co" />
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label" for="supa-key">Service Role Key</label>
+                        <input class="form-input" type="password" id="supa-key" placeholder="eyJhbGciOiJIUz..." />
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <button type="button" class="btn-connect" id="btn-connect">
+                        <span id="connect-text">🔌 Conectar y Cargar Funciones</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="form-section">
+                    <div class="form-section-title">⚙️ Edge Function</div>
+                    <div class="form-group">
+                      <label class="form-label" for="supa-function">Función a ejecutar</label>
+                      <select class="form-select" id="supa-function" disabled>
+                        <option value="">— Conecta tu proyecto primero —</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Manual Mode -->
+                <div id="manual-section" class="manual-section" style="display:none;">
+                  <div class="form-section">
+                    <div class="form-section-title">🌐 Configuración del Webhook</div>
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label class="form-label" for="manual-url">URL Destino</label>
+                        <input class="form-input" type="url" id="manual-url" placeholder="https://api.ejemplo.com/webhook" />
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label" for="manual-method">Método HTTP</label>
+                        <select class="form-select" id="manual-method">
+                          <option value="POST">POST</option>
+                          <option value="GET">GET</option>
+                          <option value="PUT">PUT</option>
+                          <option value="PATCH">PATCH</option>
+                          <option value="DELETE">DELETE</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-divider" style="margin: 1.5rem 0; border-top: 1px solid var(--border);"></div>
+
+                <!-- Schedule Section (shared) -->
+                <div class="form-section">
+                  <div class="form-section-title">🗓️ Programación</div>
+                  <div class="schedule-options">
+                    <div class="schedule-option">
+                      <input type="radio" id="type-delay" name="schedule-type" value="delay" checked />
+                      <label for="type-delay">🕐 Delay (segundos)</label>
+                    </div>
+                    <div class="schedule-option">
+                      <input type="radio" id="type-cron" name="schedule-type" value="cron" />
+                      <label for="type-cron">🔁 Cron (repetitivo)</label>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <input class="form-input" type="number" id="schedule-delay" placeholder="Ej: 60 (ejecutar en 60 segundos)" min="0" />
+                    <input class="form-input" type="text" id="schedule-cron" placeholder="Ej: */5 * * * * (cada 5 minutos)" style="display:none;" />
+                  </div>
+                </div>
+
+                <!-- Payload -->
+                <div class="form-section">
+                  <div class="form-section-title">📦 Payload (JSON)</div>
+                  <div class="form-group">
+                    <textarea class="form-textarea" id="payload" rows="5" placeholder='{ "mensaje": "Hola desde SupaCron!" }'></textarea>
+                  </div>
+                </div>
+
+                <!-- Task Name -->
+                <div class="form-section">
+                  <div class="form-group">
+                    <label class="form-label" for="job-name">Nombre de la tarea (opcional)</label>
+                    <input class="form-input" type="text" id="job-name" placeholder="Ej: Sync usuarios diario" />
+                  </div>
+                </div>
+
+              </form>
+            </div>
+            <div class="panel-footer" style="padding: 1.25rem 1.5rem; border-top: 1px solid var(--border); background: var(--bg-secondary);">
+              <button type="submit" class="btn-primary" id="btn-submit" form="scheduler-form">
+                <span class="spinner"></span>
+                <span class="btn-text">🚀 Programar Tarea</span>
+              </button>
+            </div>
           </div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-icon completed">✅</div>
-          <div class="metric-info">
-            <div class="metric-value" id="stat-completed">—</div>
-            <div class="metric-label">Exitosos</div>
-          </div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-icon failed">❌</div>
-          <div class="metric-info">
-            <div class="metric-value" id="stat-failed">—</div>
-            <div class="metric-label">Fallidos</div>
-          </div>
-        </div>
+        </section>
       </div>
-    </section>
 
-    <!-- ---- Content Grid: Form + History ---- -->
-    <div class="content-grid">
 
-      <!-- ==== SCHEDULER FORM ==== -->
-      <div class="panel">
-        <div class="panel-header">
-          <h3 class="panel-title">🚀 SupaScheduler</h3>
-        </div>
-        <div class="panel-body">
-          <form id="scheduler-form" autocomplete="off">
-
-            <!-- Mode Switcher -->
-            <div class="mode-switcher">
-              <button type="button" class="mode-tab active" data-mode="supabase">⚡ Supabase Edge Function</button>
-              <button type="button" class="mode-tab" data-mode="manual">🌐 URL Manual</button>
-            </div>
-
-            <!-- Supabase Mode -->
-            <div id="supabase-section" class="supabase-section visible">
-              <div class="form-section">
-                <div class="form-section-title">🔗 Conexión a Supabase</div>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label class="form-label" for="supa-url">URL del Proyecto</label>
-                    <input class="form-input" type="url" id="supa-url" placeholder="https://tuproyecto.supabase.co" />
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label" for="supa-key">Service Role Key</label>
-                    <input class="form-input" type="password" id="supa-key" placeholder="eyJhbGciOiJIUz..." />
-                  </div>
-                </div>
-                <div class="form-group">
-                  <button type="button" class="btn-connect" id="btn-connect">
-                    <span id="connect-text">🔌 Conectar y Cargar Funciones</span>
-                  </button>
-                </div>
-              </div>
-
-              <div class="form-section">
-                <div class="form-section-title">⚙️ Edge Function</div>
-                <div class="form-group">
-                  <label class="form-label" for="supa-function">Función a ejecutar</label>
-                  <select class="form-select" id="supa-function" disabled>
-                    <option value="">— Conecta tu proyecto primero —</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <!-- Manual Mode -->
-            <div id="manual-section" class="manual-section">
-              <div class="form-section">
-                <div class="form-section-title">🌐 Configuración del Webhook</div>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label class="form-label" for="manual-url">URL Destino</label>
-                    <input class="form-input" type="url" id="manual-url" placeholder="https://api.ejemplo.com/webhook" />
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label" for="manual-method">Método HTTP</label>
-                    <select class="form-select" id="manual-method">
-                      <option value="POST">POST</option>
-                      <option value="GET">GET</option>
-                      <option value="PUT">PUT</option>
-                      <option value="PATCH">PATCH</option>
-                      <option value="DELETE">DELETE</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-divider"></div>
-
-            <!-- Schedule Section (shared) -->
-            <div class="form-section">
-              <div class="form-section-title">🗓️ Programación</div>
-              <div class="schedule-options">
-                <div class="schedule-option">
-                  <input type="radio" id="type-delay" name="schedule-type" value="delay" checked />
-                  <label for="type-delay">🕐 Delay (segundos)</label>
-                </div>
-                <div class="schedule-option">
-                  <input type="radio" id="type-cron" name="schedule-type" value="cron" />
-                  <label for="type-cron">🔁 Cron (repetitivo)</label>
-                </div>
-              </div>
-              <div class="form-group">
-                <input class="form-input" type="number" id="schedule-delay" placeholder="Ej: 60 (ejecutar en 60 segundos)" min="0" />
-                <input class="form-input" type="text" id="schedule-cron" placeholder="Ej: */5 * * * * (cada 5 minutos)" style="display:none;" />
-              </div>
-            </div>
-
-            <!-- Payload -->
-            <div class="form-section">
-              <div class="form-section-title">📦 Payload (JSON)</div>
-              <div class="form-group">
-                <textarea class="form-textarea" id="payload" rows="5" placeholder='{ "mensaje": "Hola desde SupaCron!" }'></textarea>
-              </div>
-            </div>
-
-            <!-- Task Name -->
-            <div class="form-section">
-              <div class="form-group">
-                <label class="form-label" for="job-name">Nombre de la tarea (opcional)</label>
-                <input class="form-input" type="text" id="job-name" placeholder="Ej: Sync usuarios diario" />
-              </div>
-            </div>
-
-          </form>
-        </div>
-        <div class="panel-footer">
-          <button type="submit" class="btn-primary" id="btn-submit" form="scheduler-form">
-            <span class="spinner"></span>
-            <span class="btn-text">🚀 Programar Tarea</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- ==== HISTORY & ACTIVE COLUMNS ==== -->
-      <div style="display: grid; gap: 1.5rem;">
-        
-        <!-- ==== ACTIVE JOBS PANEL ==== -->
+      <!-- ========================================== -->
+      <!-- PAGE: ACTIVE JOBS -->
+      <!-- ========================================== -->
+      <div id="page-active-jobs" class="page-view">
         <div class="panel">
           <div class="panel-header">
             <h3 class="panel-title">🗓️ Tareas Vigentes / Programadas</h3>
@@ -217,8 +244,13 @@
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- ==== HISTORY TABLE ==== -->
+
+      <!-- ========================================== -->
+      <!-- PAGE: HISTORY -->
+      <!-- ========================================== -->
+      <div id="page-history" class="page-view">
         <div class="panel">
           <div class="panel-header" style="flex-direction: column; align-items: stretch; gap: 0.75rem;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -264,11 +296,74 @@
             </div>
           </div>
         </div>
+      </div>
+
+
+      <!-- ========================================== -->
+      <!-- PAGE: REPORTS -->
+      <!-- ========================================== -->
+      <div id="page-reports" class="page-view">
+        <h2 class="section-title" style="margin-bottom: 1.5rem;"><span class="icon">📈</span> Análisis de Rendimiento</h2>
+        
+        <div class="metrics-grid" id="reports-kpi-grid">
+          <div class="metric-card">
+            <div class="metric-icon" style="background:var(--accent-light); color:var(--accent-dark);">🎯</div>
+            <div class="metric-info"><div class="metric-value" id="reports-success-kpi">—</div><div class="metric-label">Tasa de Éxito</div></div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon" style="background:var(--info-light); color:var(--info);">🔄</div>
+            <div class="metric-info"><div class="metric-value" id="reports-total-kpi">—</div><div class="metric-label">Ejecuciones Hoy</div></div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon" style="background:var(--danger-light); color:var(--danger-dark);">⚠️</div>
+            <div class="metric-info"><div class="metric-value" id="reports-failed-kpi">—</div><div class="metric-label">Fallos Hoy</div></div>
+          </div>
+        </div>
+
+        <div class="content-grid" style="grid-template-columns: 1fr 2fr;">
+          <!-- Donut chart -->
+          <div class="panel">
+            <div class="panel-header"><h3 class="panel-title">Tasa de Éxito Global</h3></div>
+            <div class="panel-body" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 250px;">
+              <div class="donut-chart" id="reports-donut">
+                <div class="donut-hole"><span id="reports-success-rate">0%</span></div>
+              </div>
+              <div style="display: flex; gap: 1rem; margin-top: 1.5rem; font-size: 0.8125rem;">
+                <div style="display: flex; align-items: center; gap: 0.3rem;"><span style="display:inline-block; width:12px; height:12px; border-radius:3px; background:var(--accent);"></span> Éxito</div>
+                <div style="display: flex; align-items: center; gap: 0.3rem;"><span style="display:inline-block; width:12px; height:12px; border-radius:3px; background:var(--danger);"></span> Fallo</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Summary list -->
+          <div class="panel">
+            <div class="panel-header"><h3 class="panel-title">Resumen Estadístico</h3></div>
+            <div class="panel-body">
+              <div class="reports-summary-list">
+                <div class="summary-item">
+                  <span class="summary-icon">📥</span>
+                  <div class="summary-text">Total Histórico de Trabajos Creados</div>
+                  <strong id="reports-hist-total" class="summary-num">0</strong>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-icon">✅</span>
+                  <div class="summary-text" style="color:var(--accent-dark);">Ejecuciones Históricas Exitosas</div>
+                  <strong id="reports-hist-success" class="summary-num">0</strong>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-icon">❌</span>
+                  <div class="summary-text" style="color:var(--danger-dark);">Ejecuciones Históricas Fallidas</div>
+                  <strong id="reports-hist-failed" class="summary-num">0</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
       </div>
 
-    </div>
-  </main>
+    </main>
+  </div>
 
   <!-- Toast Container -->
   <div class="toast-container" id="toast-container"></div>
